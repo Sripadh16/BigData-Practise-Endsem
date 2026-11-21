@@ -1,0 +1,22 @@
+|--- diff_BPW <= 0.50
+|   |--- diff_TPW <= -0.50
+|   |   |--- diff_TPW <= -12.25
+|   |   |   |--- class: 0
+|   |   |--- diff_TPW >  -12.25
+|   |   |   |--- class: 0
+|   |--- diff_TPW >  -0.50
+|   |   |--- diff_TPW <= 10.50
+|   |   |   |--- class: 1
+|   |   |--- diff_TPW >  10.50
+|   |   |   |--- class: 1
+|--- diff_BPW >  0.50
+|   |--- diff_TPW <= -2.75
+|   |   |--- diff_TPW <= -8.50
+|   |   |   |--- class: 0
+|   |   |--- diff_TPW >  -8.50
+|   |   |   |--- class: 0
+|   |--- diff_TPW >  -2.75
+|   |   |--- diff_TPW <= 10.50
+|   |   |   |--- class: 1
+|   |   |--- diff_TPW >  10.50
+|   |   |   |--- class: 1

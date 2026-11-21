@@ -1,0 +1,12 @@
+# Course resources, lecture slides, and question materials
+lab submissions/
+slides/
+question paper.md
+Lab_questions.txt
+
+# Python & Jupyter cache/checkpoints
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+*.tmp
