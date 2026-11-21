@@ -1,3 +1,9 @@
+# Temporary scratch folders
+temp/
+
+# Prep notes and working documentation
+BigData_Hackathon_Prep.md
+
 # Course resources, lecture slides, and question materials
 lab submissions/
 slides/
