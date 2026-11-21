@@ -202,16 +202,17 @@ r_abs_h.bold = True; r_abs_h.font.size = Pt(10); r_abs_h.font.color.rgb = NAVY
 
 r_abs_body = p_abs.add_run(
     "This report presents an end-to-end data analytics study of the UCI Tennis Major Tournament Match Statistics dataset (ID: 300), "
-    "covering 943 matches and 42 tactical attributes from the four 2013 Grand Slam championships (Australian Open, French Open, "
-    "US Open, and Wimbledon). The study follows an organized analytics workflow: (1) combining multi-file data, filling unplayed "
-    "straight-set scores with zero, imputing missing operational stats with tournament-gender medians, and bounding extreme values "
-    "with Interquartile Range (IQR) fences; (2) engineering differential match metrics to eliminate target leakage and demonstrating "
-    "Min-Max, Z-score, and Decimal scaling; (3) generating 15 publication-grade exploratory visualizations with practical tennis domain "
-    "inferences; (4) mining association rules with the Dynamic Itemset Counting (DIC) algorithm using 4-state candidate tracking and interval "
-    "checkpoints; (5) training a K-Nearest Neighbors (KNN) classifier evaluated with complete diagnostic metrics (Accuracy, Precision, Recall, "
-    "Specificity, F1, ROC-AUC) and extracting transparent If-Then decision rules from a Decision Tree; (6) discovering player playstyle "
-    "archetypes with K-Means and an Agglomerative Hierarchical Clustering Dendrogram; (7) extracting Closed Frequent Itemsets (CFIs) using the "
-    "A-CLOSE algorithm; and (8) benchmarking distributed Apache Spark (PySpark) scalability against single-core execution across scaling factors up to 20x."
+    "covering 943 matches and 42 recorded in-match tactical performance attributes (yielding 45 combined columns including tournament surface, "
+    "gender, and outcome metadata) from the four 2013 Grand Slam championships (Australian Open, French Open, US Open, and Wimbledon). "
+    "The study follows an organized analytics workflow: (1) combining multi-file data, filling unplayed straight-set scores with zero, "
+    "imputing missing operational stats with tournament-gender medians, and bounding extreme values with Interquartile Range (IQR) fences; "
+    "(2) engineering differential match metrics to eliminate target leakage and demonstrating Min-Max, Z-score, and Decimal scaling; "
+    "(3) generating 15 publication-grade visualizations with practical tennis domain inferences; (4) mining association rules with the Dynamic "
+    "Itemset Counting (DIC) algorithm using 4-state candidate tracking and interval checkpoints; (5) training a K-Nearest Neighbors (KNN) classifier "
+    "evaluated with complete diagnostic metrics (Accuracy, Precision, Recall, Specificity, F1, ROC-AUC) and extracting transparent If-Then decision "
+    "rules from a Decision Tree; (6) discovering player playstyle archetypes with K-Means and an Agglomerative Hierarchical Clustering Dendrogram; "
+    "(7) extracting Closed Frequent Itemsets (CFIs) using the A-CLOSE algorithm; and (8) benchmarking distributed Apache Spark (PySpark) scalability "
+    "against single-core execution across scaling factors up to 20x."
 )
 r_abs_body.font.size = Pt(9.5); r_abs_body.font.color.rgb = DARK_BODY
 
@@ -334,9 +335,10 @@ doc.add_paragraph()
 # ==============================================================================
 add_heading_1("3. Exploratory Data Visualizations & Tennis Inferences")
 add_body(
-    "To thoroughly explore match characteristics, twelve unique exploratory visualizations were generated. Each figure presents a distinct aspect "
-    "of tournament dynamics and is paired with a direct, plain-language explanation of what it reveals about professional tennis. "
-    "(Diagnostic visualizations for predictive modeling and big data scalability are presented directly within Sections 5, 7, and 9 respectively)."
+    "To thoroughly explore match characteristics, fifteen unique visualizations were generated across this study. Twelve exploratory visualizations "
+    "are detailed below in Section 3, while diagnostic and distributed scalability visualizations are integrated directly into their respective "
+    "predictive modeling and big data sections (Plot 13 in Section 5, Plot 14 in Section 7, and Plot 15 in Section 9). Each figure presents a distinct "
+    "aspect of tournament dynamics and is paired with a direct, plain-language explanation of what it reveals about professional tennis."
 )
 
 academic_plots = [
@@ -368,8 +370,8 @@ academic_plots = [
      "in early rounds. Long five-set matches occur in about 11% of men's contests."),
 
     ("Plot 7: Correlation Heatmap of Performance KPIs and Victory (Heatmap)", "fig7_heatmap_correlation.png",
-     "Domain Inference: Differential Total Points Won (r = 0.88) and Differential Break Points Won (r = 0.74) correlate most strongly with winning the match. "
-     "Serving aces correlates only weakly (r = 0.28), confirming that consistent rally play is far more decisive than raw serve speed."),
+     "Domain Inference: Differential Total Points Won (r = 0.67) and Differential Break Points Won (r = 0.65) correlate most strongly with winning the match. "
+     "In contrast, serving aces correlates only weakly (r = 0.28 to 0.31), confirming that consistent rally point conversion and breaking serve are far more decisive than raw serve velocity."),
 
     ("Plot 8: Pareto 80/20 Distribution of Aces Among Top Servers (Pareto Chart)", "fig8_pareto_player_aces.png",
      "Domain Inference: Ace production follows the 80/20 rule: roughly 12% of the player field hits nearly 80% of all tournament aces. High ace totals "
@@ -474,6 +476,11 @@ add_screenshot_placeholder(
 add_heading_1("5. Supervised Match Outcome Classification with K-Nearest Neighbors (KNN)")
 add_body(
     "We trained a K-Nearest Neighbors (KNN) classifier to predict whether Player 1 wins (Result = 1) or Player 2 wins (Result = 0). "
+    "Methodological Clarification: The input feature vector consists of post-match differential performance indicators (such as diff_TPW, "
+    "diff_BPW, and diff_WNR). Thus, this model performs match-outcome classification using observed in-match performance data to explain what "
+    "tactical margins determine victory, rather than pre-match outcome forecasting using historical priors."
+)
+add_body(
     "The dataset was split into an 80% training set (754 matches) and a 20% test set (189 matches) using stratified sampling. "
     "Features were standardized using StandardScaler fitted strictly on the training set to prevent data leakage."
 )
@@ -481,11 +488,11 @@ add_body(
     "We evaluated neighborhood sizes across K in [1, 3, 5, 7, 9, 11, 15, 21]. The optimal model occurred at K=7 under Euclidean distance. "
     "Complete evaluation metrics on the unseen test set:\n"
     "• Overall Test Accuracy: 93.12% (176 / 189 correct predictions)\n"
-    "• Precision: 92.55% (87 / 94)\n"
-    "• Recall / Sensitivity: 93.55% (87 / 93)\n"
-    "• Specificity: 92.71% (89 / 96)\n"
-    "• F1-Score: 0.9305\n"
-    "• Area Under the ROC Curve (ROC-AUC): 0.9684"
+    "• Precision: 91.67% (88 / 96)\n"
+    "• Recall / Sensitivity: 94.62% (88 / 93)\n"
+    "• Specificity: 91.67% (88 / 96)\n"
+    "• F1-Score: 0.9312\n"
+    "• Area Under the ROC Curve (ROC-AUC): 0.9572"
 )
 
 add_heading_2("Plot 13: Diagnostic Evaluation of KNN Classifier: Confusion Matrix and ROC Curve (Heatmap & ROC)")
@@ -494,8 +501,8 @@ if os.path.exists(img_path):
     doc.add_picture(img_path, width=Inches(5.8))
     doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
 add_body(
-    "Domain Inference: The optimal KNN classifier (K=7) achieves an Area Under the ROC Curve of 0.9684. "
-    "The confusion matrix shows high sensitivity (93.55%) and high specificity (92.71%), misclassifying only 13 out of 189 test matches. "
+    "Domain Inference: The optimal KNN classifier (K=7) achieves an Area Under the ROC Curve of 0.9572. "
+    "The confusion matrix shows high recall / sensitivity (94.62%) and balanced specificity (91.67%), misclassifying only 13 out of 189 test matches (8 false positives, 5 false negatives). "
     "The model demonstrates strong predictive power and balanced error distribution without overfitting."
 )
 doc.add_paragraph()
@@ -545,8 +552,9 @@ add_heading_1("7. Player Playstyle Discovery via K-Means, K-Modes & Comparative 
 
 add_heading_2("7.1 Continuous Playstyle Discovery via K-Means")
 add_body(
-    "To identify player styles without ground-truth labels, unsupervised K-Means clustering was performed on the standardized continuous differential metrics. "
-    "Both the Elbow heuristic and Silhouette validation (Plot 12) confirmed K=3 natural playstyle clusters:\n"
+    "To discover player archetypes without ground-truth labels, unsupervised K-Means clustering was performed on the standardized continuous differential metrics. "
+    "Methodological Clarification: The differential metrics represent head-to-head performance margin comparisons between the two opponents in a contest, "
+    "rather than isolated individual player career profiles. Both the Elbow heuristic and Silhouette validation (Plot 12) confirmed K=3 natural match-dynamic clusters:\n"
     "• Cluster 0 (Big Servers): High positive ace differential (+4.47), high winners (+11.20), rapid service holds, and strong overall point differential (+11.06).\n"
     "• Cluster 1 (Baseline Grinders): Negative ace differential (-1.68), elevated unforced errors (+7.15), and negative point differential (-11.99); players struggling to control baseline tempo.\n"
     "• Cluster 2 (Aggressive Counter-Attackers): Low unforced errors (-13.29), strong break point conversion (+2.50), and positive point differential (+3.77); patient, disciplined competitors."
@@ -557,6 +565,8 @@ add_body(
     "As specified in the examination options, we also implemented the K-Modes clustering algorithm. While K-Means is restricted to continuous features "
     "where geometric Euclidean means are meaningful, K-Modes is designed specifically for categorical data. It uses simple matching dissimilarity "
     "(Hamming distance) and updates cluster centers using the mode of each categorical feature.\n\n"
+    "Methodological Clarification: Because Match_Win is included as a categorical feature, the discovered clusters represent match-performance "
+    "outcome profiles (such as winning dominance versus unforced error deficits) rather than independent player personalities.\n\n"
     "We applied K-Modes (K=3) across a discrete categorical matrix comprising match metadata (Surface, Gender) and binary performance indicators "
     "(High_Aces, Low_Errors, High_Winners, BP_Advantage, Dominant_Serve, Match_Win). The algorithm converged with a total dissimilarity cost of 1897.0, "
     "discovering three discrete modal archetypes:\n"
@@ -605,7 +615,7 @@ doc.add_paragraph()
 add_body(
     "Algorithm Selection & Justification:\n"
     "1. For Match Winner Prediction: K-Nearest Neighbors is unequivocally superior. Because match outcome labels (Result) are available, supervised KNN "
-    "learns the true decision boundary in the continuous metric space, achieving 93.12% accuracy and 0.9572 ROC-AUC. Unsupervised methods (K-Means/K-Modes) "
+    "learns the true decision boundary in the continuous metric space, achieving 93.12% accuracy, 94.62% recall, 91.67% specificity, and 0.9572 ROC-AUC. Unsupervised methods (K-Means/K-Modes) "
     "lack target supervision and cannot serve as reliable outcome classifiers.\n"
     "2. For Continuous Tactical Clustering: K-Means outperforms K-Modes. Tennis performance metrics (differential points, aces, errors) are continuous. "
     "K-Means preserves the continuous distance gradient, distinguishing between close 2-point tiebreak margins and 25-point routs. Discretizing these stats "
@@ -614,8 +624,7 @@ add_body(
     "an interpretable discrete macro-profile of match conditions."
 )
 
-add_heading_2("7.4 Hierarchical Agglomerative Clustering Dendrogram")
-add_heading_2("Plot 14: Hierarchical Agglomerative Clustering Dendrogram (Ward Linkage)")
+add_heading_2("7.4 Hierarchical Agglomerative Clustering Dendrogram (Plot 14: Ward Linkage)")
 img_path = os.path.join(FIGURES_DIR, "fig14_hierarchical_dendrogram.png")
 if os.path.exists(img_path):
     doc.add_picture(img_path, width=Inches(5.8))
@@ -718,15 +727,15 @@ if os.path.exists(img_path):
     doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
 add_body(
     "Domain Inference: While single-threaded Python runs in milliseconds on small baseline data (1x) due to zero JVM startup overhead, "
-    "PySpark maintains flat, predictable execution time (~10.5 seconds) as transaction volume expands 20-fold. This demonstrates that Spark's "
-    "memory-partitioned DAG scheduler eliminates the exponential combinatorial slowdown inherent in single-core mining algorithms, "
-    "successfully establishing the performance enhancement and horizontal scalability of distributed sports telemetry across both association rule mining and clustering."
+    "PySpark demonstrates stable, near-constant execution time (~2.0 to 2.4 seconds across 2 worker threads) as data scales 20-fold. "
+    "Single-core Python is faster at this in-memory scale, so no speedup is claimed over Python for small datasets; rather, PySpark establishes "
+    "architectural stability and horizontal scalability required for massive datasets that exceed single-machine memory."
 )
 doc.add_paragraph()
 
 add_screenshot_placeholder(
-    "PySpark Active Session & MLlib FP-Growth Output",
-    "Take a screenshot of the Jupyter Notebook output showing the PySpark SparkSession initialization, FP-Growth association rules table, and the scalability benchmark DataFrame."
+    "PySpark Active Session, MLlib FP-Growth & K-Means Output",
+    "Take a screenshot of the Jupyter Notebook output showing the PySpark SparkSession initialization, FP-Growth association rules table, MLlib K-Means distributed cluster centroids, and the scalability benchmark DataFrame."
 )
 
 # ==============================================================================
@@ -737,13 +746,14 @@ add_body(
     "1. Comprehensive Analytics Lifecycle: Every required component of data analytics—multi-file schema unification, deterministic missing value handling, "
     "IQR outlier capping, three normalization methods, 15 unique visualizations with domain inferences, DIC association rule mining, KNN classification, "
     "Decision Tree rules, K-Means and Hierarchical clustering, A-CLOSE CFI mining, and PySpark distributed scaling—was thoroughly executed.\n"
-    "2. Core Tactical Determinants: Match victory is governed primarily by break point conversion efficiency and differential total points won rather than "
-    "maximal serve velocity. A positive break point differential gives an 86.8% certainty of winning the match.\n"
-    "3. Modeling Accuracy: The KNN classifier reached 93.12% accuracy with 0.9572 ROC-AUC and 91.67% specificity. Decision Tree induction produced "
+    "2. Core Tactical Determinants: Match victory is governed primarily by break point conversion efficiency and differential total points won (r = 0.67 and r = 0.65) "
+    "rather than maximal serve velocity. A positive break point differential gives an 86.8% certainty of winning the match.\n"
+    "3. Modeling Accuracy: The KNN classifier reached 93.12% accuracy with 0.9572 ROC-AUC, 94.62% sensitivity, and 91.67% specificity. Decision Tree induction produced "
     "transparent If-Then rules suitable for court coaching.\n"
-    "4. Player Archetypes: Unsupervised clustering and hierarchical dendrogram analysis clearly separated three player styles: Power Servers, Baseline Grinders, "
+    "4. Player Archetypes: Unsupervised clustering and hierarchical dendrogram analysis clearly separated three match dynamic styles: Big Servers, Baseline Grinders, "
     "and Disciplined Counter-Attackers.\n"
-    "5. Big Data Readiness: PySpark MLlib successfully scaled association rule mining, demonstrating flat distributed latency across increasing data volumes."
+    "5. Big Data Readiness: PySpark MLlib successfully ran both distributed association rule mining (FP-Growth) and distributed clustering (K-Means), demonstrating "
+    "stable horizontal scaling (~2.0 to 2.4 seconds) as dataset volume expanded 20-fold."
 )
 
 add_heading_1("References")

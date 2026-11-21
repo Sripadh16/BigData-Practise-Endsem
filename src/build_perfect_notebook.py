@@ -388,7 +388,7 @@ plt.show()
 
 add_md("""
 **Inference for Plot 7 (Heatmap):**  
-Differential Total Points Won (`diff_TPW`, $r=0.88$) and Differential Break Points Won (`diff_BPW`, $r=0.74$) correlate most strongly with winning the match. In contrast, serving aces correlates only weakly ($r=0.28$). This proves that winning points consistently from the baseline is far more important than relying on big individual serves.
+Differential Total Points Won (`diff_TPW`, $r=0.67$) and Differential Break Points Won (`diff_BPW`, $r=0.65$) correlate most strongly with winning the match. In contrast, serving aces correlates only weakly ($r=0.28$ to $0.31$). This confirms that winning points consistently from the baseline and converting break opportunities are far more decisive than raw serve velocity.
 """)
 
 # Plot 8: Pareto Chart
@@ -662,8 +662,11 @@ The rule `BP_Advantage -> Match_Win` shows a confidence of **86.58%** with a lif
 # Section 7: Supervised Classification with KNN
 add_md("""
 ## 7. Supervised Match Outcome Classification with K-Nearest Neighbors (KNN)
-We use the differential metrics to predict whether Player 1 wins (`Result = 1`) or Player 2 wins (`Result = 0`). 
-We split the data into an 80% training set and a 20% test set, fitting our scaler only on the training set to prevent data leakage. We evaluate K values from 1 to 21 to find the optimal neighborhood size.
+We use the differential performance metrics to classify whether Player 1 wins (`Result = 1`) or Player 2 wins (`Result = 0`). 
+
+> **Methodological Clarification:** The features used are observed in-match differential metrics ($\Delta = \text{Player 1} - \text{Player 2}$). This model performs post-match outcome classification based on match performance data to explain what tactical margins determine victory, rather than pre-match forecasting.
+
+We split the data into an 80% training set (754 matches) and a 20% test set (189 matches) using stratified sampling, fitting our scaler only on the training set to prevent data leakage. We evaluate K values from 1 to 21 under Euclidean distance to determine the optimal neighborhood size.
 """)
 
 add_code("""
@@ -747,7 +750,7 @@ plt.show()
 
 add_md("""
 **Inference for Plot 13 (KNN Confusion Matrix & ROC Curve):**  
-The KNN classifier achieves an **Accuracy of 93.12%** and a **ROC-AUC of 0.9684** at $K=7$ (with $K=9$ and $K=21$ also yielding identical high accuracy). The specificity is high at **92.71%**, showing that the model rarely mistakes a loss for a win. Only 13 out of 189 test matches were misclassified.
+The optimal KNN classifier ($K=7$) achieves an **Accuracy of 93.12%** (176 / 189 correct predictions), **Precision of 91.67%** (88 / 96), **Recall (Sensitivity) of 94.62%** (88 / 93), **Specificity of 91.67%** (88 / 96), **F1-Score of 0.9312**, and a **ROC-AUC of 0.9572**. The model displays balanced sensitivity and specificity, misclassifying only 13 out of 189 test matches (8 false positives, 5 false negatives) without evidence of class bias.
 """)
 
 # Section 8: Decision Tree & If-Then Rules
@@ -844,17 +847,19 @@ add_md("""
 ### 9.3 Comparative Analysis: K-Nearest Neighbors vs. K-Means vs. K-Modes
 **Which algorithm is better suited for this dataset?**
 
+> **Methodological Clarification:** In continuous K-Means clustering, the differential features represent head-to-head match margin dynamics between opponents, rather than isolated individual career player traits. Similarly, because `Match_Win` is included as an attribute in K-Modes clustering, the resulting mode clusters capture match-performance outcome profiles (winning vs. losing dynamics) rather than independent player personalities.
+
 | Dimension | K-Nearest Neighbors (KNN) | K-Means Clustering | K-Modes Clustering |
 | :--- | :--- | :--- | :--- |
 | **Learning Paradigm** | Supervised Classification | Unsupervised Clustering | Unsupervised Clustering |
 | **Data Type Required** | Continuous Numerical Features | Continuous Numerical Features | Discrete / Categorical Attributes |
 | **Distance / Similarity** | Euclidean Distance ($L_2$) | Euclidean Distance ($L_2$) | Simple Matching Dissimilarity (Hamming) |
 | **Centroid / Prototype** | N/A (Instance-based voting) | Centroid Mean Vector $\mu_k$ | Attribute Modes Vector |
-| **Match Outcome Prediction** | **Optimal** (93.12% accuracy, 0.9684 AUC) | Evaluates playstyle clusters | Evaluates macro categorical states |
+| **Match Outcome Prediction** | **Optimal** (93.12% accuracy, 0.9572 AUC) | Evaluates playstyle clusters | Evaluates macro categorical states |
 | **Tennis Suitability** | **Best for Outcome Prediction** | **Best for Continuous Playstyle Analysis** | Useful for categorical / discrete summary |
 
 **Verdict and Justification:**
-1. **For Match Outcome Prediction:** **KNN is clearly superior** because it is a supervised algorithm that learns directly from the target labels (`Result`), finding the optimal decision boundary between winners and losers with high accuracy ($93.12\%$) and specificity ($92.71\%$). K-Means and K-Modes are unsupervised, meaning they group matches without knowing the actual winner.
+1. **For Match Outcome Prediction:** **KNN is clearly superior** because it is a supervised algorithm that learns directly from the target labels (`Result`), finding the optimal decision boundary between winners and losers with high accuracy ($93.12\%$), sensitivity ($94.62\%$), and specificity ($91.67\%$). K-Means and K-Modes are unsupervised, meaning they group matches without knowing the actual winner.
 2. **For Clustering Continuous Match Metrics:** **K-Means is better than K-Modes**. Tennis point metrics (`diff_TPW`, `diff_ACE`, `diff_BPW`) are continuous. K-Means preserves the continuous gradient (distinguishing between a +2 point nail-biter and a +30 point blowout). Discretizing these stats for K-Modes loses fine numerical nuance.
 3. **When K-Modes is Valuable:** K-Modes excels when analyzing purely categorical attributes (such as surface type, gender, and discretized match profiles), providing a clear macro-level summary of modal patterns.
 """)
@@ -1067,18 +1072,18 @@ add_md("""
 **Inference for Plot 15 (PySpark Distributed Scalability & Dual Predictive Techniques):**  
 Both distributed predictive analytics techniques executed successfully on the Apache Spark cluster:
 1. **PySpark MLlib FP-Growth:** Successfully discovered distributed association rules matching our sequential DIC algorithm (e.g., break point advantage predicting match victory with 86.8% confidence and 1.76 lift).
-2. **PySpark MLlib K-Means:** Successfully converged to 3 distributed playstyle archetypes with a strong Silhouette score (0.7518), verifying that distributed clustering replicates the archetypes discovered by scikit-learn without centralized memory bottlenecks.
-3. **Scalability:** On small datasets ($1\\times$), single-threaded Python runs in milliseconds because it avoids Spark's JVM and inter-process communication overhead. As data scales to $10\\times$ and $20\\times$, PySpark's memory-partitioned DAG scheduler scales smoothly with predictable, flat latency, confirming its suitability for production-scale tennis telemetry.
+2. **PySpark MLlib K-Means:** Successfully converged to 3 distributed playstyle archetypes with a Silhouette score of 0.4013, verifying that distributed clustering replicates the archetypes discovered by scikit-learn without centralized memory bottlenecks.
+3. **Scalability Finding:** On small datasets ($1\\times$), single-threaded Python runs in milliseconds because it avoids Spark's JVM initialization and inter-process communication overhead. As data scales to $10\\times$ and $20\\times$, PySpark demonstrates flat, constant-latency execution (~2.0 to 2.4 seconds across 2 worker threads). While single-core Python is faster at this in-memory volume (meaning no speedup is claimed over Python for small datasets), PySpark establishes architectural stability and horizontal scalability required for datasets that exceed single-machine memory.
 """)
 
 # Section 12: Conclusions
 add_md("""
 ## 12. Conclusions & Practical Recommendations
 1. **Cleaning and Transformation:** Reconciling the 8 Grand Slam CSV files resolved schema discrepancies. Replacing unplayed sets with zeros and imputing missing statistics via group medians produced a complete, high-quality dataset of 943 matches.
-2. **Key Tactical Determinants:** Differential total points won (`diff_TPW`) and break points won (`diff_BPW`) are the strongest predictors of match victory. A positive break point differential gives an 86.6% probability of winning the match.
-3. **Model Accuracy:** The KNN classifier reached **93.12% accuracy** with an ROC-AUC of **0.9684** and high specificity (**92.71%**). The Decision Tree provided clear, practical if-then rules for players and coaches.
+2. **Key Tactical Determinants:** Differential total points won (`diff_TPW`, $r=0.67$) and break points won (`diff_BPW`, $r=0.65$) are the strongest predictors of match victory. A positive break point differential gives an 86.6% probability of winning the match.
+3. **Model Accuracy:** The KNN classifier reached **93.12% accuracy** with an ROC-AUC of **0.9572**, **94.62% recall**, and **91.67% specificity**. The Decision Tree provided clear, practical if-then rules for players and coaches.
 4. **Player Archetypes:** Unsupervised clustering and hierarchical dendrogram analysis successfully identified three distinct styles: Big Servers, Patient Baseline Grinders, and Aggressive High-Risk Attackers.
-5. **Big Data Scalability:** PySpark MLlib successfully ran association rule mining and demonstrated linear scaling as dataset sizes expanded.
+5. **Big Data Scalability:** PySpark MLlib successfully ran both distributed association rule mining (FP-Growth) and distributed clustering (K-Means), demonstrating stable horizontal scaling as dataset sizes expanded.
 """)
 
 # ==============================================================================
